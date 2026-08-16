@@ -4,7 +4,7 @@ import yaml
 import argparse
 from backend.src.config import settings
 
-def evaluate_model(model_path="runs/day3_baseline_5epochs/weights/best.pt"):
+def evaluate_model(model_path=r"runs\detect\runs\day3_baseline_5epochs\weights\best.pt"):
     try:
         from ultralytics import YOLO
     except ImportError:
