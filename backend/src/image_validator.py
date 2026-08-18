@@ -30,8 +30,21 @@ def validate_image(image_path: str) -> dict:
         if height == 0 or width == 0:
             return {"valid": False, "error": "INVALID_DIMENSIONS", "message": "Image dimensions are invalid"}
             
-        # --- Day 3 Image Quality Conditions ---
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # Check min/max dimensions
+        min_dim = getattr(settings, "MIN_IMAGE_DIMENSION", 32)
+        max_dim = getattr(settings, "MAX_IMAGE_DIMENSION", 8192)
+        if height < min_dim or width < min_dim or height > max_dim or width > max_dim:
+            return {"valid": False, "error": "INVALID_DIMENSIONS", "message": f"Image dimensions {width}x{height} outside acceptable limits [{min_dim}, {max_dim}]"}
+            
+        # --- Day 3/4 Image Quality Conditions and Grayscale/RGB Compatibility ---
+        if len(img.shape) == 2:
+            gray = img.copy()
+        elif len(img.shape) == 3 and img.shape[2] == 1:
+            gray = img[:, :, 0].copy()
+        elif len(img.shape) == 3 and img.shape[2] in (3, 4):
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        else:
+            return {"valid": False, "error": "UNSUPPORTED_CHANNELS", "message": f"Unsupported channel configuration: {img.shape}"}
         
         # 1. Blur detection (Variance of Laplacian)
         blur_val = cv2.Laplacian(gray, cv2.CV_64F).var()

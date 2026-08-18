@@ -185,17 +185,50 @@ Establish a reproducible baseline YOLO defect-detection training and validation 
 
 ---
 
-## Day 4 — (Planned)
+## Day 4 — Pixel-Level Inspection Engine Implementation (2026-08-18)
 
 ### Objective
-Complete YOLO model training with higher epoch counts, tune hyperparameters, and finalize model evaluation metrics.
+Transform the Day 3 prototype into a robust pixel-level inspection engine using OpenCV region analysis, feature extraction, multi-component quality scoring, and batch processing.
 
-### Planned Work
-- Train with 50–100 epochs for production-quality baseline
-- Hyperparameter tuning (learning rate, augmentation)
-- Detailed per-class performance analysis
-- Confidence threshold optimization
-- Model comparison documentation
+### Work Completed
+- **Extended Configuration**: Updated `config.py` with default parameters for preprocessing, segmentation, feature Canny limits, and multi-component scoring weights. Fixed Pydantic V2 class Config warning.
+- **Preprocessor Module**: Created `preprocessor.py` for deterministic resizing, grayscale conversion, Gaussian denoising, CLAHE contrast enhancement, and normalization.
+- **Segmentation Module**: Created `segmentation.py` implementing adaptive thresholding, morphological opening/closing, contour connected component analysis, and a custom circular bearing surface mask to exclude background and center hole noise.
+- **Feature Extractor Module**: Created `feature_extractor.py` to extract metrics like affected pixel counts, region count, largest region area, edge density (via Canny), and intensity/contrast statistics.
+- **Inspection Result Schema**: Created `inspection_result.py` with standard Pydantic schema supporting JSON serialization and explaining score breakdown and deterministic analysis reliability.
+- **Scoring & Classification Improvements**: Implemented explainable multi-component pixel scoring in `scoring.py` (deducting weighted penalties from 100.0) and tested boundary cases.
+- **Batch Processing**: Created `batch_inspector.py` to process image directories, containing per-image errors gracefully and returning summary statistics.
+- **Debug Visualization**: Created `visualizer.py` to save side-by-side annotated original vs defect overlay images.
+- **CLI Enhancements**: Updated `main.py` adding `--pixel-inspect`, `--batch`, `--visualize`, and `--log-level` flags.
+- **Comprehensive Testing**: Added 11 unit and integration tests across all modules.
+
+### Key Decisions
+- Restrict defect analysis strictly to the bearing surface using circular masking based on scaling dimensions.
+- Use Canny edge detection solely for texture roughness/edge density metrics, not semantic segmentation.
+- Coexistence of Day 3 YOLO detection structure and Day 4 pixel segmentation structure.
+
+### Files Created
+- `backend/src/preprocessor.py`
+- `backend/src/segmentation.py`
+- `backend/src/feature_extractor.py`
+- `backend/src/inspection_result.py`
+- `backend/src/visualizer.py`
+- `backend/src/batch_inspector.py`
+- `backend/tests/test_preprocessor.py`
+- `backend/tests/test_segmentation.py`
+- `backend/tests/test_feature_extractor.py`
+- `backend/tests/test_inspection_result.py`
+- `backend/tests/test_pixel_scoring.py`
+- `backend/tests/test_batch_inspector.py`
+- `docs/DAY4_ARCHITECTURE.md`
+
+### Files Modified
+- `backend/src/config.py`
+- `backend/src/image_validator.py`
+- `backend/src/quality_engine.py`
+- `backend/src/scoring.py`
+- `backend/main.py`
+- `docs/WORKFLOW.md`
 
 ---
 
