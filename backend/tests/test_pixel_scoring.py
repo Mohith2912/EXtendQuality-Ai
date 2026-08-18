@@ -72,3 +72,35 @@ def test_scoring_boundaries_and_classification():
     
     # Maximum score (100.0)
     assert determine_status(100.0) == "PASS"
+
+
+def test_pixel_scoring_extreme_inputs():
+    # Test with extremely large values (should clamp penalties)
+    features_large = {
+        "affected_pixel_percentage": 500.0,
+        "edge_density": 10.0,
+        "region_count": 500,
+    }
+    res = calculate_pixel_quality_score(features_large)
+    # Deductions: max_penalty (40) + max_edge_penalty (15) + max_region_penalty (10) = 65
+    # 100 - 65 = 35
+    assert res["quality_score"] == pytest.approx(35.0, abs=0.1)
+    
+    # Test with negative values (should not cause negative penalty or crash)
+    features_neg = {
+        "affected_pixel_percentage": -10.0,
+        "edge_density": -0.5,
+        "region_count": -5,
+    }
+    res = calculate_pixel_quality_score(features_neg)
+    assert 0.0 <= res["quality_score"] <= 100.0
+    
+    # Test with NaN / Infinity values
+    features_nan = {
+        "affected_pixel_percentage": float('nan'),
+        "edge_density": float('inf'),
+        "region_count": 0,
+    }
+    res = calculate_pixel_quality_score(features_nan)
+    assert 0.0 <= res["quality_score"] <= 100.0
+
